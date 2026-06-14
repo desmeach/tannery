@@ -1,0 +1,84 @@
+definitions:
+  dto.UserSignInRequest:
+    properties:
+      login:
+        maxLength: 32
+        type: string
+      password:
+        maxLength: 64
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  dto.UserSignInResponse:
+    properties:
+      access_token:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.UserSignUpRequest:
+    properties:
+      login:
+        maxLength: 32
+        type: string
+      password:
+        maxLength: 64
+        type: string
+    required:
+    - login
+    - password
+    type: object
+info:
+  contact: {}
+  description: This is api for tannery messenger
+  title: Tannery app API
+  version: "1.0"
+paths:
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: authenticate user and get token
+      parameters:
+      - description: Sign in request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserSignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserSignInResponse'
+      summary: Login user
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create user account
+      parameters:
+      - description: Sign up request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserSignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ok
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register new user account
+      tags:
+      - auth
+swagger: "2.0"

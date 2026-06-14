@@ -1,0 +1,25 @@
+app:
+  name: "tannery-app"
+  version: "1.0.0"
+  environment: "development"
+
+mongo:
+  core_db: "core_db_name"
+  auth_db: "auth_db_name"
+  max_pool: 100
+  min_pool: 10
+
+http:
+  read_timeout: 10s
+  write_timeout: 10s
+  max_header_bytes: 1048576
+  enable_cors: true
+
+jwt:
+  access_ttl: 15m
+  refresh_ttl: 168h
+  issuer: "tannery-app"
+
+redis:
+  db: 0
+  pool_size: 10
