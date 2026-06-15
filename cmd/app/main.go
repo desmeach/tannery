@@ -8,7 +8,7 @@ import (
 // @version 1.0
 // @description Tannery app API for lightweight web messenger made for few friends
 func main() {
-	err := app.Run("configs")
+	err := app.Run()
 	if err != nil {
 		panic(err)
 	}
