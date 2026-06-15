@@ -20,15 +20,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Run(configPath string) error {
+func Run() error {
 	log := setupPrettySlog()
 	log.Info("Starting application...")
 
 	log.Info("🍃Initialize application`s config...")
-	cfg, err := config.Init(configPath)
-	if err != nil {
-		return err
-	}
+	cfg := config.MustLoad()
 
 	log.Info("🍃Creating MongoDB client...")
 	mongoClient, err := mongoDatabase.NewClient(cfg.Mongo.URI, cfg.Mongo.Username, cfg.Mongo.Password, cfg.Mongo.MaxPool, cfg.Mongo.MinPool)
@@ -43,7 +40,6 @@ func Run(configPath string) error {
 	db := mongoClient.Database(cfg.Mongo.CoreDB)
 
 	authRepo := authRepository.NewRepository(log, db)
-	//groupRepo := groupRepository.NewRepository(db)
 
 	authServ := authService.NewUserService(log, authRepo, jwtManager)
 
