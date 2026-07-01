@@ -1,6 +1,8 @@
 package model
 
-import "tanneryApp/internal/errors"
+import (
+	"tanneryApp/internal/domain/errors"
+)
 
 const (
 	minMemberRestriction = 1

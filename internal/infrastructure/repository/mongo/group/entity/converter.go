@@ -1,8 +1,10 @@
 package entity
 
-import "tanneryApp/internal/model"
+import (
+	model2 "tanneryApp/internal/domain/model"
+)
 
-func ToGroupRecord(group model.Group) GroupRecord {
+func ToGroupRecord(group model2.Group) GroupRecord {
 	return GroupRecord{
 		Id:          group.Id,
 		Title:       group.Title,
@@ -12,13 +14,13 @@ func ToGroupRecord(group model.Group) GroupRecord {
 	}
 }
 
-func toGroup(record GroupRecord) (model.Group, error) {
-	memberCount, err := model.NewGroupMembersCount(record.MemberCount)
+func toGroup(record GroupRecord) (model2.Group, error) {
+	memberCount, err := model2.NewGroupMembersCount(record.MemberCount)
 	if err != nil {
-		return model.Group{}, err
+		return model2.Group{}, err
 	}
 
-	return model.Group{
+	return model2.Group{
 		Id:           record.Id,
 		Title:        record.Title,
 		IsPrivate:    record.IsPrivate,

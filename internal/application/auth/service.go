@@ -1,18 +1,12 @@
-package user
+package auth
 
 import (
 	"context"
 	"log/slog"
-	"tanneryApp/internal/contracts"
-	"tanneryApp/internal/errors"
-	"tanneryApp/internal/model"
-	"tanneryApp/pkg/jwt"
+	"tanneryApp/internal/domain/errors"
+	"tanneryApp/internal/domain/model"
+	"tanneryApp/internal/infrastructure/jwt"
 )
-
-type SignInOut struct {
-	UserId      string
-	AccessToken string
-}
 
 type Repository interface {
 	Create(ctx context.Context, user model.AuthUser) error
@@ -55,25 +49,25 @@ func (s *Service) SignUp(ctx context.Context, login, password string) error {
 	return nil
 }
 
-func (s *Service) SignIn(ctx context.Context, login, password string) (contracts.SignInResult, error) {
+func (s *Service) SignIn(ctx context.Context, login, password string) (SignInResult, error) {
 	user, err := s.repo.FindByLogin(ctx, login)
 	if err != nil {
-		return contracts.SignInResult{}, err
+		return SignInResult{}, err
 	}
 
 	plainPass, err := model.NewUserPasswordPlain(password)
 	if err != nil {
-		return contracts.SignInResult{}, err
+		return SignInResult{}, err
 	}
 
 	if !user.Password.Compare(plainPass) {
-		return contracts.SignInResult{}, errors.ErrSignInInvalidData
+		return SignInResult{}, errors.ErrSignInInvalidData
 	}
 
 	token, err := s.jwtManager.Build(user.Id)
 	if err != nil {
-		return contracts.SignInResult{}, err
+		return SignInResult{}, err
 	}
 
-	return contracts.SignInResult{UserId: user.Id, AccessToken: token}, nil
+	return SignInResult{UserId: user.Id, AccessToken: token}, nil
 }

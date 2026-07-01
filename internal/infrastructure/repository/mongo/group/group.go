@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"context"
-	"tanneryApp/internal/model"
+	"tanneryApp/internal/domain/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
