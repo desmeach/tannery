@@ -1,7 +1,4 @@
-app:
-  name: "tannery-app"
-  version: "1.0.0"
-  environment: "development"
+env: "local"
 
 mongo:
   core_db: "core_db_name"

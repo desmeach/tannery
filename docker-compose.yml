@@ -1,7 +1,7 @@
 services:
   mongodb:
-    image: mongo:4.4-bionic
-    container_name: mongodb
+    image: mongo:6.0
+    container_name: tannery-mongodb
     restart: always
     environment:
       - MONGO_DATA_DIR=/data/db
@@ -11,9 +11,79 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
     volumes:
       - ./.data/db:/data/db
+    networks:
+      - tannery-network
     ports:
       - '27017:27017'
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: tannery-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    networks:
+      - tannery-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${MINIO_API_PORT}/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: tannery-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin};
+      mc mb myminio/${MINIO_BUCKET:-tannery-files} --ignore-existing;
+      mc policy set download myminio/${MINIO_BUCKET:-tannery-files};
+      exit 0;
+      "
+    networks:
+      - tannery-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: tannery-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispass}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - tannery-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  tannery-network:
+    driver: bridge
+    name: tannery-network
 
 volumes:
-  mongodb_data:
+  mongodb-data:
+    driver: local
+  minio-data:
+    driver: local
+  redis-data:
     driver: local
