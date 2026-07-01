@@ -1,18 +1,24 @@
 package auth
 
 import (
+	"context"
 	"net/http"
-	"tanneryApp/internal/contracts"
+	"tanneryApp/internal/application/auth"
 	"tanneryApp/internal/delivery/http/v1/auth/dto"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Handler struct {
-	service contracts.AuthService
+type Service interface {
+	SignUp(ctx context.Context, login, password string) error
+	SignIn(ctx context.Context, login, password string) (auth.SignInResult, error)
 }
 
-func NewHandler(service contracts.AuthService) *Handler {
+type Handler struct {
+	service Service
+}
+
+func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 

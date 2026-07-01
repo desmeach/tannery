@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 	"strings"
-	"tanneryApp/pkg/jwt"
+	"tanneryApp/internal/infrastructure/jwt"
 
 	"github.com/gin-gonic/gin"
 )

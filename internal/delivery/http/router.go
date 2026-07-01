@@ -3,7 +3,7 @@ package http
 import (
 	"fmt"
 	"tanneryApp/cmd/docs"
-	"tanneryApp/internal/config"
+	"tanneryApp/internal/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

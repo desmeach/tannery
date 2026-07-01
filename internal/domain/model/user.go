@@ -1,16 +1,16 @@
 package model
 
-// User - user domain model
+// User is entity to store public user data
 type User struct {
 	Id        string
 	FirstName string
 	LastName  string
 	Email     UserEmail
-	Phone     string
-	Nickname  string
+	Phone     UserPhone
+	Nickname  UserNickname
 }
 
-func NewUser(id, firstName, lastName, phone, nickname string, email UserEmail) User {
+func NewUser(id, firstName, lastName string, nickname UserNickname, phone UserPhone, email UserEmail) User {
 	return User{
 		Id:        id,
 		FirstName: firstName,

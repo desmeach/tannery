@@ -4,29 +4,32 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	errs "tanneryApp/internal/errors"
+	errs "tanneryApp/internal/domain/errors"
+	"tanneryApp/internal/domain/model"
+	"tanneryApp/internal/infrastructure/repository/mongo/auth/entity"
 	"tanneryApp/internal/lib/logger/sl"
-	"tanneryApp/internal/model"
-	authEntity "tanneryApp/internal/repository/mongo/auth/entity"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Repository of auth user collection
 type Repository struct {
 	logger *slog.Logger
 	db     *mongo.Collection
 }
 
+// NewRepository create auth user repo
 func NewRepository(logger *slog.Logger, db *mongo.Database) *Repository {
 	return &Repository{
 		logger: logger,
-		db:     db.Collection("user"),
+		db:     db.Collection("auth_user"),
 	}
 }
 
+// Create auth user in db
 func (r *Repository) Create(ctx context.Context, user model.AuthUser) error {
-	record, err := authEntity.ToAuthUserRecord(user)
+	record, err := entity.ToAuthUserRecord(user)
 	if err != nil {
 		return err
 	}
@@ -38,10 +41,12 @@ func (r *Repository) Create(ctx context.Context, user model.AuthUser) error {
 	return nil
 }
 
+// FindById returns auth user by id (objectId)
 func (r *Repository) FindById(ctx context.Context, id string) (model.AuthUser, error) {
 	return model.AuthUser{}, errors.New("not implemented")
 }
 
+// FindByLogin returns auth user by login
 func (r *Repository) FindByLogin(ctx context.Context, login string) (model.AuthUser, error) {
 	op := "auth.repo.findByLogin"
 
@@ -55,13 +60,13 @@ func (r *Repository) FindByLogin(ctx context.Context, login string) (model.AuthU
 		return model.AuthUser{}, errs.ErrUserNotFound
 	}
 
-	userRecord := authEntity.AuthUserRecord{}
+	userRecord := entity.AuthUserRecord{}
 	if err := result.Decode(&userRecord); err != nil {
 		log.Error("failed to decode user", op, sl.Err(err))
 		return model.AuthUser{}, err
 	}
 
-	userModel, err := authEntity.ToAuthUser(userRecord)
+	userModel, err := entity.ToAuthUser(userRecord)
 	if err != nil {
 		log.Error("failed to convert user record to entity", op, sl.Err(err))
 		return model.AuthUser{}, err
