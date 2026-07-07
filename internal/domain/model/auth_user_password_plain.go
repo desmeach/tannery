@@ -8,13 +8,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserPasswordPlain is value object to store password which can be hashed
-type UserPasswordPlain string
+// AuthUserPasswordPlain is value object to store password which can be hashed
+type AuthUserPasswordPlain string
 
 const MinPasswordLength = 8
 
-// NewUserPasswordPlain create plain password value object
-func NewUserPasswordPlain(value string) (UserPasswordPlain, error) {
+// NewAuthUserPasswordPlain create plain password value object
+func NewAuthUserPasswordPlain(value string) (AuthUserPasswordPlain, error) {
 	if len(value) < MinPasswordLength {
 		return "", fmt.Errorf("%w: minimum %d characters required", errors.ErrPasswordTooShort, MinPasswordLength)
 	}
@@ -28,19 +28,19 @@ func NewUserPasswordPlain(value string) (UserPasswordPlain, error) {
 		return "", errors.ErrPasswordInvalidCharacters
 	}
 
-	return UserPasswordPlain(value), nil
+	return AuthUserPasswordPlain(value), nil
 }
 
 // Hash create plain password's hash
-func (p UserPasswordPlain) Hash() (UserPasswordHashed, error) {
+func (p AuthUserPasswordPlain) Hash() (AuthUserPasswordHashed, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-	return UserPasswordHashed(hash), nil
+	return AuthUserPasswordHashed(hash), nil
 }
 
-// String type cast from NewUserPasswordPlain to string
-func (p UserPasswordPlain) String() string {
+// String type cast from AuthUserPasswordPlain to string
+func (p AuthUserPasswordPlain) String() string {
 	return string(p)
 }

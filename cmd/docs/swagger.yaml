@@ -1,5 +1,5 @@
 definitions:
-  dto.UserSignInRequest:
+  tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest:
     properties:
       login:
         maxLength: 32
@@ -11,14 +11,14 @@ definitions:
     - login
     - password
     type: object
-  dto.UserSignInResponse:
+  tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse:
     properties:
       access_token:
         type: string
       user_id:
         type: string
     type: object
-  dto.UserSignUpRequest:
+  tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest:
     properties:
       login:
         maxLength: 32
@@ -32,8 +32,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is api for tannery messenger
-  title: Tannery app API
+  description: Tannery app API for lightweight web messenger made for few friends
+  title: Tannery App
   version: "1.0"
 paths:
   /auth/sign-in:
@@ -47,14 +47,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.UserSignInRequest'
+          $ref: '#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.UserSignInResponse'
+            $ref: '#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse'
       summary: Login user
       tags:
       - auth
@@ -69,15 +69,10 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.UserSignUpRequest'
-      produces:
-      - application/json
+          $ref: '#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest'
       responses:
         "201":
           description: ok
-          schema:
-            additionalProperties: true
-            type: object
       summary: Register new user account
       tags:
       - auth

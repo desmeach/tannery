@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -29,8 +28,8 @@ type MongoConfig struct {
 }
 
 type HttpConfig struct {
-	Host           string        `yaml:"host" env:"HOST"`
-	Port           string        `yaml:"port" env:"PORT"`
+	Host           string        `yaml:"host" env:"HTTP_HOST"`
+	Port           string        `yaml:"port" env:"HTTP_PORT"`
 	ReadTimeout    time.Duration `yaml:"read_timeout" env:"READ_TIMEOUT"`
 	WriteTimeout   time.Duration `yaml:"write_timeout" env:"WRITE_TIMEOUT"`
 	MaxHeaderBytes int           `yaml:"max_header_bytes" env:"MAX_HEADER_BYTES"`
@@ -76,8 +75,6 @@ func MustLoadWithPath(path string) *Config {
 	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
 		panic("failed to read config: " + err.Error())
 	}
-
-	fmt.Printf("%+v\n", cfg)
 
 	return &cfg
 }

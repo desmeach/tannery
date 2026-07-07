@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	errs "tanneryApp/internal/domain/errors"
 	"tanneryApp/internal/domain/model"
+	"tanneryApp/internal/infrastructure/logger/sl"
 	"tanneryApp/internal/infrastructure/repository/mongo/auth/entity"
-	"tanneryApp/internal/lib/logger/sl"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -41,7 +41,7 @@ func (r *Repository) Create(ctx context.Context, user model.AuthUser) error {
 	return nil
 }
 
-// FindById returns auth user by id (objectId)
+// FindById returns auth user by id
 func (r *Repository) FindById(ctx context.Context, id string) (model.AuthUser, error) {
 	return model.AuthUser{}, errors.New("not implemented")
 }
@@ -66,11 +66,7 @@ func (r *Repository) FindByLogin(ctx context.Context, login string) (model.AuthU
 		return model.AuthUser{}, err
 	}
 
-	userModel, err := entity.ToAuthUser(userRecord)
-	if err != nil {
-		log.Error("failed to convert user record to entity", op, sl.Err(err))
-		return model.AuthUser{}, err
-	}
+	userModel := entity.ToAuthUser(userRecord)
 
 	return userModel, nil
 }

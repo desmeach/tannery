@@ -4,21 +4,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserPasswordHashed is value object to store password's hash
-type UserPasswordHashed string
+// AuthUserPasswordHashed is value object to store password's hash
+type AuthUserPasswordHashed string
 
-// NewUserPasswordHashed create password hash value object
-func NewUserPasswordHashed(value string) UserPasswordHashed {
-	return UserPasswordHashed(value)
+// NewAuthUserPasswordHashed create password hash value object
+func NewAuthUserPasswordHashed(value string) AuthUserPasswordHashed {
+	return AuthUserPasswordHashed(value)
 }
 
-// String type cast from UserPasswordHashed to string
-func (h UserPasswordHashed) String() string {
+// String type cast from AuthUserPasswordHashed to string
+func (h AuthUserPasswordHashed) String() string {
 	return string(h)
 }
 
 // Compare hash password with plain
-func (h UserPasswordHashed) Compare(plain UserPasswordPlain) bool {
+func (h AuthUserPasswordHashed) Compare(plain AuthUserPasswordPlain) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(h), []byte(plain))
 	return err == nil
 }
