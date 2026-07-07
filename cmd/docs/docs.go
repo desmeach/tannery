@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignInRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignInResponse"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse"
                         }
                     }
                 }
@@ -53,9 +53,6 @@ const docTemplate = `{
             "post": {
                 "description": "create user account",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -69,24 +66,20 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignUpRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "ok"
                     }
                 }
             }
         }
     },
     "definitions": {
-        "dto.UserSignInRequest": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -103,7 +96,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserSignInResponse": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -114,7 +107,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserSignUpRequest": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -140,8 +133,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Tannery app API",
-	Description:      "This is api for tannery messenger",
+	Title:            "Tannery App",
+	Description:      "Tannery app API for lightweight web messenger made for few friends",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

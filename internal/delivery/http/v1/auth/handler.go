@@ -27,9 +27,8 @@ func NewHandler(service Service) *Handler {
 // @Tags auth
 // @Description create user account
 // @Accept json
-// @Produce json
 // @Param request body dto.UserSignUpRequest true "Sign up request"
-// @Success 201 {object} map[string]interface{} "ok"
+// @Success 201 "ok"
 // @Router /auth/sign-up [post]
 func (h *Handler) SignUp(c *gin.Context) {
 	var input dto.UserSignUpRequest

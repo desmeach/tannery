@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is api for tannery messenger",
-        "title": "Tannery app API",
+        "description": "Tannery app API for lightweight web messenger made for few friends",
+        "title": "Tannery App",
         "contact": {},
         "version": "1.0"
     },
@@ -27,7 +27,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignInRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest"
                         }
                     }
                 ],
@@ -35,7 +35,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignInResponse"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse"
                         }
                     }
                 }
@@ -45,9 +45,6 @@
             "post": {
                 "description": "create user account",
                 "consumes": [
-                    "application/json"
-                ],
-                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -61,24 +58,20 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserSignUpRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "ok"
                     }
                 }
             }
         }
     },
     "definitions": {
-        "dto.UserSignInRequest": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -95,7 +88,7 @@
                 }
             }
         },
-        "dto.UserSignInResponse": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -106,7 +99,7 @@
                 }
             }
         },
-        "dto.UserSignUpRequest": {
+        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest": {
             "type": "object",
             "required": [
                 "login",

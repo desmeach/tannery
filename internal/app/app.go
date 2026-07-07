@@ -12,8 +12,8 @@ import (
 	"tanneryApp/internal/delivery/http/v1/auth"
 	"tanneryApp/internal/infrastructure/config"
 	"tanneryApp/internal/infrastructure/jwt"
+	"tanneryApp/internal/infrastructure/logger/slogpretty"
 	authRepository "tanneryApp/internal/infrastructure/repository/mongo/auth"
-	"tanneryApp/internal/lib/logger/slogpretty"
 	mongoDatabase "tanneryApp/pkg/database/mongo"
 	"time"
 

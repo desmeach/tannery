@@ -29,7 +29,7 @@ func NewUserService(logger *slog.Logger, repo Repository, jwtManager *jwt.Manage
 }
 
 func (s *Service) SignUp(ctx context.Context, login, password string) error {
-	plainPass, err := model.NewUserPasswordPlain(password)
+	plainPass, err := model.NewAuthUserPasswordPlain(password)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (s *Service) SignUp(ctx context.Context, login, password string) error {
 		return err
 	}
 
-	user := model.NewAuthUser("", login, passHash)
+	user := model.NewAuthUser(login, passHash)
 
 	err = s.repo.Create(ctx, user)
 	if err != nil {
@@ -55,19 +55,20 @@ func (s *Service) SignIn(ctx context.Context, login, password string) (SignInRes
 		return SignInResult{}, err
 	}
 
-	plainPass, err := model.NewUserPasswordPlain(password)
+	plainPass, err := model.NewAuthUserPasswordPlain(password)
 	if err != nil {
 		return SignInResult{}, err
 	}
 
-	if !user.Password.Compare(plainPass) {
+	if !user.PasswordCompare(plainPass) {
 		return SignInResult{}, errors.ErrSignInInvalidData
 	}
 
-	token, err := s.jwtManager.Build(user.Id)
+	userId := user.Id()
+	token, err := s.jwtManager.Build(userId)
 	if err != nil {
 		return SignInResult{}, err
 	}
 
-	return SignInResult{UserId: user.Id, AccessToken: token}, nil
+	return SignInResult{UserId: userId, AccessToken: token}, nil
 }
