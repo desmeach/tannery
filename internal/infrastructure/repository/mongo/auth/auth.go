@@ -3,10 +3,9 @@ package user
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"sync"
 	errs "tanneryApp/internal/domain/errors"
-	"tanneryApp/internal/domain/model"
-	"tanneryApp/internal/infrastructure/logger/sl"
+	"tanneryApp/internal/domain/model/auth"
 	"tanneryApp/internal/infrastructure/repository/mongo/auth/entity"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,24 +14,27 @@ import (
 
 // Repository of auth user collection
 type Repository struct {
-	logger *slog.Logger
-	db     *mongo.Collection
+	mu *sync.Mutex
+	db *mongo.Collection
 }
 
 // NewRepository create auth user repo
-func NewRepository(logger *slog.Logger, db *mongo.Database) *Repository {
+func NewRepository(db *mongo.Database) *Repository {
 	return &Repository{
-		logger: logger,
-		db:     db.Collection("auth_user"),
+		db: db.Collection("auth"),
 	}
 }
 
 // Create auth user in db
-func (r *Repository) Create(ctx context.Context, user model.AuthUser) error {
-	record, err := entity.ToAuthUserRecord(user)
+func (r *Repository) Create(ctx context.Context, user auth.User) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	record, err := entity.ToUserRecord(user)
 	if err != nil {
 		return err
 	}
+
 	_, err = r.db.InsertOne(ctx, record)
 	if err != nil {
 		return err
@@ -41,32 +43,46 @@ func (r *Repository) Create(ctx context.Context, user model.AuthUser) error {
 	return nil
 }
 
+// findBy find auth user by column
+func (r *Repository) findBy(ctx context.Context, column string, value interface{}) (*auth.User, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	result := r.db.FindOne(ctx, bson.M{column: value})
+
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return nil, errs.ErrUserNotFound
+	}
+
+	userRecord := entity.UserRecord{}
+	if err := result.Decode(userRecord); err != nil {
+		return nil, err
+	}
+
+	userEntity, err := entity.ToUser(userRecord)
+	if err != nil {
+		return nil, err
+	}
+
+	return userEntity, nil
+}
+
 // FindById returns auth user by id
-func (r *Repository) FindById(ctx context.Context, id string) (model.AuthUser, error) {
-	return model.AuthUser{}, errors.New("not implemented")
+func (r *Repository) FindById(ctx context.Context, id string) (*auth.User, error) {
+	userModel, err := r.findBy(ctx, "_id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return userModel, nil
 }
 
 // FindByLogin returns auth user by login
-func (r *Repository) FindByLogin(ctx context.Context, login string) (model.AuthUser, error) {
-	op := "auth.repo.findByLogin"
-
-	log := r.logger.With(
-		slog.String("op", op),
-	)
-
-	result := r.db.FindOne(ctx, bson.M{"login": login})
-	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-		log.Error("user not found", op, sl.Err(result.Err()))
-		return model.AuthUser{}, errs.ErrUserNotFound
+func (r *Repository) FindByLogin(ctx context.Context, login string) (*auth.User, error) {
+	userModel, err := r.findBy(ctx, "login", login)
+	if err != nil {
+		return nil, err
 	}
-
-	userRecord := entity.AuthUserRecord{}
-	if err := result.Decode(&userRecord); err != nil {
-		log.Error("failed to decode user", op, sl.Err(err))
-		return model.AuthUser{}, err
-	}
-
-	userModel := entity.ToAuthUser(userRecord)
 
 	return userModel, nil
 }

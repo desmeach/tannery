@@ -2,16 +2,20 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/http"
-	"tanneryApp/internal/application/auth"
-	"tanneryApp/internal/delivery/http/v1/auth/dto"
+	"tanneryApp/internal/application/auth/command"
+	"tanneryApp/internal/application/auth/query"
+	"tanneryApp/internal/delivery/http/v1/auth/request"
+	"tanneryApp/internal/delivery/http/v1/auth/response"
+	errs "tanneryApp/internal/domain/errors"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Service interface {
-	SignUp(ctx context.Context, login, password string) error
-	SignIn(ctx context.Context, login, password string) (auth.SignInResult, error)
+	SignUp(ctx context.Context, cmd command.SignUpCommand) error
+	SignIn(ctx context.Context, q query.SignInQuery) (*query.SignInQueryResult, error)
 }
 
 type Handler struct {
@@ -31,9 +35,8 @@ func NewHandler(service Service) *Handler {
 // @Success 201 "ok"
 // @Router /auth/sign-up [post]
 func (h *Handler) SignUp(c *gin.Context) {
-	var input dto.UserSignUpRequest
-	if err := c.BindJSON(&input); err != nil {
-		//newResponse(c, http.StatusBadRequest, "invalid input body")
+	var req request.SignUpRequest
+	if err := c.BindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "invalid input body",
 		})
@@ -41,18 +44,12 @@ func (h *Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.SignUp(c.Request.Context(), input.Login, input.Password); err != nil {
-		//if errors.Is(err, domain.ErrUserAlreadyExists) {
-		//	newResponse(c, http.StatusBadRequest, err.Error())
-		//
-		//	return
-		//}
+	cmd := req.ToSignUpCommand()
 
+	if err := h.service.SignUp(c.Request.Context(), cmd); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
-		//newResponse(c, http.StatusInternalServerError, err.Error())
-
 		return
 	}
 
@@ -69,24 +66,32 @@ func (h *Handler) SignUp(c *gin.Context) {
 // @Success 200 {object} dto.UserSignInResponse
 // @Router /auth/sign-in [post]
 func (h *Handler) SignIn(c *gin.Context) {
-	var input dto.UserSignInRequest
-	if err := c.BindJSON(&input); err != nil {
+	var req request.SignInRequest
+	if err := c.BindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "invalid input body",
 		})
 		return
 	}
 
-	response, err := h.service.SignIn(c.Request.Context(), input.Login, input.Password)
+	q := req.ToSignInQuery()
+
+	result, err := h.service.SignIn(c.Request.Context(), *q)
 	if err != nil {
+		if errors.Is(err, errs.ErrUserNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"message": errs.ErrUserNotFound.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.UserSignInResponse{
-		UserId:      response.UserId,
-		AccessToken: response.AccessToken,
-	})
+	res := response.ToSignInResponse(*result)
+
+	c.JSON(http.StatusOK, res)
 }
