@@ -39,7 +39,7 @@ func Run() error {
 
 	db := mongoClient.Database(cfg.Mongo.CoreDB)
 
-	authRepo := authRepository.NewRepository(log, db)
+	authRepo := authRepository.NewRepository(db)
 
 	authServ := authService.NewUserService(log, authRepo, jwtManager)
 
