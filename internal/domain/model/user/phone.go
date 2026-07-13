@@ -1,4 +1,4 @@
-package model
+package user
 
 import (
 	"regexp"
@@ -6,30 +6,31 @@ import (
 	errs "tanneryApp/internal/domain/errors"
 )
 
-// UserPhone is value object to store and validate user phone
-type UserPhone string
+// Phone is value object to store and validate profile phone
+type Phone string
 
-// NewUserPhone create user phone value object
-func NewUserPhone(value string) (UserPhone, error) {
+// NewPhone create profile phone value object
+func NewPhone(value string) (*Phone, error) {
 	value = strings.TrimSpace(value)
 
 	if value == "" {
-		return "", errs.ErrPhoneEmpty
+		return nil, errs.ErrPhoneEmpty
 	}
 
 	if !strings.HasPrefix(value, "+") {
-		return "", errs.ErrInvalidPhoneFormat
+		return nil, errs.ErrInvalidPhoneFormat
 	}
 
 	if !isNumeric(value[1:]) {
-		return "", errs.ErrPhoneContainsLetters
+		return nil, errs.ErrPhoneContainsLetters
 	}
 
 	if err := validatePhoneFormat(value); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return UserPhone(value), nil
+	phone := Phone(value)
+	return &phone, nil
 }
 
 // validatePhoneFormat validate phone's format
@@ -59,7 +60,12 @@ func isNumeric(s string) bool {
 	return true
 }
 
-// String type cast from UserPhone to string
-func (u UserPhone) String() string {
-	return string(u)
+// String type cast from Phone to string
+func (up Phone) String() string {
+	return string(up)
+}
+
+// Mask return masked Phone as string
+func (up Phone) Mask() string {
+	return "****" + up.String()[len(up.String())-4:]
 }

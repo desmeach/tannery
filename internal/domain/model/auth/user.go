@@ -6,19 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
-// User is entity to store auth user data with credentials
+// User is entity to store auth profile data with credentials
 type User struct {
-	id        string
+	id        uuid.UUID
 	login     Login
 	password  PasswordHash
 	createdAt time.Time
 	updatedAt time.Time
 }
 
-// NewUser create auth user entity
+// NewUser create auth profile entity
 func NewUser(login Login, password PasswordHash) *User {
 	return &User{
-		id:        uuid.NewString(),
+		id:        uuid.New(),
 		login:     login,
 		password:  password,
 		createdAt: time.Now(),
@@ -27,7 +27,7 @@ func NewUser(login Login, password PasswordHash) *User {
 }
 
 // RestoreUser build User from all fields
-func RestoreUser(id string, login Login, password string, createdAt, updatedAt time.Time) *User {
+func RestoreUser(id uuid.UUID, login Login, password string, createdAt, updatedAt time.Time) *User {
 	return &User{
 		id:        id,
 		login:     login,
@@ -37,7 +37,7 @@ func RestoreUser(id string, login Login, password string, createdAt, updatedAt t
 	}
 }
 
-func (au *User) Id() string {
+func (au *User) Id() uuid.UUID {
 	return au.id
 }
 

@@ -26,12 +26,12 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
-// SignUp register user
-// @Summary Register new user account
-// @Tags auth
-// @Description create user account
+// SignUp register auth user
+// @Summary Register new auth user account
+// @Tags Auth
+// @Description create auth user account
 // @Accept json
-// @Param request body dto.UserSignUpRequest true "Sign up request"
+// @Param request body request.SignUpRequest true "Sign up body"
 // @Success 201 "ok"
 // @Router /auth/sign-up [post]
 func (h *Handler) SignUp(c *gin.Context) {
@@ -56,14 +56,14 @@ func (h *Handler) SignUp(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-// SignIn user login
-// @Summary Login user
-// @Tags auth
-// @Description authenticate user and get token
+// SignIn auth user login
+// @Summary Login auth user
+// @Tags Auth
+// @Description authenticate auth user and get token
 // @Accept json
 // @Produce json
-// @Param request body dto.UserSignInRequest true "Sign in request"
-// @Success 200 {object} dto.UserSignInResponse
+// @Param request body request.SignInRequest true "Sign in body"
+// @Success 200 {object} response.SignInResponse
 // @Router /auth/sign-in [post]
 func (h *Handler) SignIn(c *gin.Context) {
 	var req request.SignInRequest

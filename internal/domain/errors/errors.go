@@ -14,6 +14,7 @@ var (
 	ErrGroupMemberCountInvalid   = errors.New("member count is invalid")
 	ErrSignInInvalidData         = errors.New("credentials is invalid")
 	ErrUserNotFound              = errors.New("user not found")
+	ErrProfileNotFound           = errors.New("profile not found")
 	ErrProfileFirstNameIsEmpty   = errors.New("firstname is empty")
 	ErrProfileLastNameIsEmpty    = errors.New("lastname is empty")
 	ErrInvalidEmailFormat        = errors.New("invalid email format: must be *@*.*")

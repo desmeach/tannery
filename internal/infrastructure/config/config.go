@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"time"
 
@@ -10,11 +11,16 @@ import (
 )
 
 type Config struct {
-	Env   string      `yaml:"env"`
-	Mongo MongoConfig `yaml:"mongo"`
-	Http  HttpConfig  `yaml:"http"`
-	JWT   JWTConfig   `yaml:"jwt"`
-	Redis RedisConfig `yaml:"redis"`
+	Env    string      `yaml:"env"`
+	Mongo  MongoConfig `yaml:"mongo"`
+	Http   HttpConfig  `yaml:"http"`
+	JWT    JWTConfig   `yaml:"jwt"`
+	Redis  RedisConfig `yaml:"redis"`
+	Common CommonConfig
+}
+
+type CommonConfig struct {
+	GracefulTimeout time.Duration `env:"GRACEFUL_TIMEOUT" envDefault:"30s"`
 }
 
 type MongoConfig struct {
@@ -52,6 +58,10 @@ type RedisConfig struct {
 }
 
 func MustLoad() *Config {
+	if err := godotenv.Load(); err != nil {
+		panic("error loading .env file: " + err.Error())
+	}
+
 	path := fetchConfigPath()
 
 	if path == "" {
@@ -62,10 +72,6 @@ func MustLoad() *Config {
 }
 
 func MustLoadWithPath(path string) *Config {
-	if err := godotenv.Load(); err != nil {
-		panic("error loading .env file: " + err.Error())
-	}
-
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		panic("config file does not exist: " + path)
 	}
@@ -87,6 +93,7 @@ func fetchConfigPath() string {
 
 	if path == "" {
 		path = os.Getenv("CONFIG_PATH")
+		fmt.Println("CONFIG_PATH", path)
 	}
 
 	return path

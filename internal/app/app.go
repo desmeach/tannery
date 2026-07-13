@@ -1,19 +1,24 @@
 package app
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	authService "tanneryApp/internal/application/auth"
+	authServices "tanneryApp/internal/application/auth/services"
+	userServices "tanneryApp/internal/application/user/services"
 	httpDelivery "tanneryApp/internal/delivery/http"
 	"tanneryApp/internal/delivery/http/v1/auth"
+	"tanneryApp/internal/delivery/http/v1/user"
 	"tanneryApp/internal/infrastructure/config"
 	"tanneryApp/internal/infrastructure/jwt"
 	"tanneryApp/internal/infrastructure/logger/slogpretty"
 	authRepository "tanneryApp/internal/infrastructure/repository/mongo/auth"
+	profileRepository "tanneryApp/internal/infrastructure/repository/mongo/profile"
 	mongoDatabase "tanneryApp/pkg/database/mongo"
 	"time"
 
@@ -39,18 +44,21 @@ func Run() error {
 
 	db := mongoClient.Database(cfg.Mongo.CoreDB)
 
-	authRepo := authRepository.NewRepository(db)
+	authRepo := authRepository.NewRepository(*db)
+	profileRepo := profileRepository.NewRepository(*db)
 
-	authServ := authService.NewUserService(log, authRepo, jwtManager)
+	authServ := authServices.NewUserService(*log, authRepo, *jwtManager)
+	profileServ := userServices.NewProfileService(*log, profileRepo, *jwtManager)
 
 	authHandler := auth.NewHandler(authServ)
+	userHandler := user.NewHandler(profileServ)
 
 	router := gin.Default()
 	router.Use(
 		gin.Recovery(),
 		gin.Logger(),
 	)
-	httpDelivery.RegisterRoutes(router, cfg, authHandler)
+	httpDelivery.RegisterRoutes(router, cfg, *jwtManager, authHandler, userHandler)
 
 	log.Info("🍃Starting server...")
 
@@ -65,18 +73,29 @@ func Run() error {
 
 	log.Info(fmt.Sprintf("🚀Server started on %s", hostUrl))
 
-	err = server.ListenAndServe()
-	if err != nil {
+	go func() {
+		err = server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error(err.Error())
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+	log.Info("Shutting down server gracefully...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.Common.GracefulTimeout)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Error(err.Error())
-		return err
+	} else {
+		log.Info("Server gracefully stopped")
 	}
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
-
-	<-stop
-
-	log.Info("Gracefully stopped")
+	log.Info("Cleanup complete")
 
 	return nil
 }

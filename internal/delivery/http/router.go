@@ -3,7 +3,9 @@ package http
 import (
 	"fmt"
 	"tanneryApp/cmd/docs"
+	"tanneryApp/internal/delivery/http/middleware"
 	"tanneryApp/internal/infrastructure/config"
+	"tanneryApp/internal/infrastructure/jwt"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -15,7 +17,12 @@ type AuthHandler interface {
 	SignIn(ctx *gin.Context)
 }
 
-func RegisterRoutes(router *gin.Engine, cfg *config.Config, authHandler AuthHandler) {
+type UserHandler interface {
+	GetCurrentProfile(ctx *gin.Context)
+	CreateProfile(ctx *gin.Context)
+}
+
+func RegisterRoutes(router *gin.Engine, cfg *config.Config, jwtManager jwt.Manager, authHandler AuthHandler, userHandler UserHandler) {
 	docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", cfg.Http.Host, cfg.Http.Port)
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
@@ -24,9 +31,15 @@ func RegisterRoutes(router *gin.Engine, cfg *config.Config, authHandler AuthHand
 
 	api := router.Group("/api/v1")
 
-	users := api.Group("/auth")
+	auth := api.Group("/auth")
 	{
-		users.POST("/sign-up", authHandler.SignUp)
-		users.POST("/sign-in", authHandler.SignIn)
+		auth.POST("/sign-up", authHandler.SignUp)
+		auth.POST("/sign-in", authHandler.SignIn)
+	}
+
+	user := api.Group("/user").Use(middleware.AuthMiddleware(jwtManager))
+	{
+		user.GET("/profile", userHandler.GetCurrentProfile)
+		user.POST("/profile", userHandler.CreateProfile)
 	}
 }
