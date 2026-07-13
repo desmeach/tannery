@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/auth/sign-in": {
             "post": {
-                "description": "authenticate user and get token",
+                "description": "authenticate auth user and get token",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,17 +25,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
-                "summary": "Login user",
+                "summary": "Login auth user",
                 "parameters": [
                     {
-                        "description": "Sign in request",
+                        "description": "Sign in body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_request.SignInRequest"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_response.SignInResponse"
                         }
                     }
                 }
@@ -51,22 +51,22 @@ const docTemplate = `{
         },
         "/auth/sign-up": {
             "post": {
-                "description": "create user account",
+                "description": "create auth user account",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
-                "summary": "Register new user account",
+                "summary": "Register new auth user account",
                 "parameters": [
                     {
-                        "description": "Sign up request",
+                        "description": "Sign up body",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest"
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_auth_request.SignUpRequest"
                         }
                     }
                 ],
@@ -76,10 +76,62 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/profile": {
+            "get": {
+                "description": "return current user profile",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Show current user profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_user_response.GetCurrentProfileResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "creates user profile if not exits",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Create user profile",
+                "parameters": [
+                    {
+                        "description": "User body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_user_request.CreateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/tanneryApp_internal_delivery_http_v1_user_response.CreateProfileResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInRequest": {
+        "tanneryApp_internal_delivery_http_v1_auth_request.SignInRequest": {
             "type": "object",
             "required": [
                 "login",
@@ -88,39 +140,97 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 20,
+                    "minLength": 5
                 },
                 "password": {
                     "type": "string",
-                    "maxLength": 64
+                    "maxLength": 40,
+                    "minLength": 8
                 }
             }
         },
-        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignInResponse": {
+        "tanneryApp_internal_delivery_http_v1_auth_request.SignUpRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 5
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "minLength": 8
+                }
+            }
+        },
+        "tanneryApp_internal_delivery_http_v1_auth_response.SignInResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
                     "type": "string"
+                }
+            }
+        },
+        "tanneryApp_internal_delivery_http_v1_user_request.CreateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
                 },
-                "user_id": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }
         },
-        "tanneryApp_internal_delivery_http_v1_auth_dto.UserSignUpRequest": {
+        "tanneryApp_internal_delivery_http_v1_user_response.CreateProfileResponse": {
             "type": "object",
-            "required": [
-                "login",
-                "password"
-            ],
             "properties": {
-                "login": {
-                    "type": "string",
-                    "maxLength": 32
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "tanneryApp_internal_delivery_http_v1_user_response.GetCurrentProfileResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
                 },
-                "password": {
-                    "type": "string",
-                    "maxLength": 64
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         }

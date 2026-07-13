@@ -8,36 +8,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AuthMiddleware struct {
-	manager *jwt.Manager
-}
-
-func NewAuthMiddleware(manager *jwt.Manager) *AuthMiddleware {
-	return &AuthMiddleware{manager: manager}
-}
-
-func (m *AuthMiddleware) Validate() gin.HandlerFunc {
+func AuthMiddleware(manager jwt.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
-
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "authorization header is required",
-			})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			return
 		}
 
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "invalid authorization header format",
-			})
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header format must be Bearer"})
 			return
 		}
 
-		token := parts[1]
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		claims, err := m.manager.Parse(token)
+		claims, err := manager.Parse(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": "invalid token",

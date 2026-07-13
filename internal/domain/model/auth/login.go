@@ -6,7 +6,7 @@ import (
 	"tanneryApp/internal/domain/errors"
 )
 
-// Login is value object to store user login
+// Login is value object to store profile login
 type Login string
 
 const MinLoginLength = 5

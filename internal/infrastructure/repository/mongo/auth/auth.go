@@ -8,42 +8,48 @@ import (
 	"tanneryApp/internal/domain/model/auth"
 	"tanneryApp/internal/infrastructure/repository/mongo/auth/entity"
 
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Repository of auth user collection
+// Repository of auth profile collection
 type Repository struct {
-	mu *sync.Mutex
+	mu sync.Mutex
 	db *mongo.Collection
 }
 
-// NewRepository create auth user repo
-func NewRepository(db *mongo.Database) *Repository {
+// NewRepository create auth profile repo
+func NewRepository(db mongo.Database) *Repository {
 	return &Repository{
 		db: db.Collection("auth"),
 	}
 }
 
-// Create auth user in db
-func (r *Repository) Create(ctx context.Context, user auth.User) error {
+// Create auth profile in db
+func (r *Repository) Create(ctx context.Context, user auth.User) (*uuid.UUID, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	record, err := entity.ToUserRecord(user)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = r.db.InsertOne(ctx, record)
+	result, err := r.db.InsertOne(ctx, record)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	id, err := uuid.Parse(result.InsertedID.(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return &id, nil
 }
 
-// findBy find auth user by column
+// findBy find auth profile by column
 func (r *Repository) findBy(ctx context.Context, column string, value interface{}) (*auth.User, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -55,7 +61,7 @@ func (r *Repository) findBy(ctx context.Context, column string, value interface{
 	}
 
 	userRecord := entity.UserRecord{}
-	if err := result.Decode(userRecord); err != nil {
+	if err := result.Decode(&userRecord); err != nil {
 		return nil, err
 	}
 
@@ -67,9 +73,9 @@ func (r *Repository) findBy(ctx context.Context, column string, value interface{
 	return userEntity, nil
 }
 
-// FindById returns auth user by id
-func (r *Repository) FindById(ctx context.Context, id string) (*auth.User, error) {
-	userModel, err := r.findBy(ctx, "_id", id)
+// FindById returns auth profile by id
+func (r *Repository) FindById(ctx context.Context, id uuid.UUID) (*auth.User, error) {
+	userModel, err := r.findBy(ctx, "_id", id.String())
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +83,7 @@ func (r *Repository) FindById(ctx context.Context, id string) (*auth.User, error
 	return userModel, nil
 }
 
-// FindByLogin returns auth user by login
+// FindByLogin returns auth profile by login
 func (r *Repository) FindByLogin(ctx context.Context, login string) (*auth.User, error) {
 	userModel, err := r.findBy(ctx, "login", login)
 	if err != nil {
